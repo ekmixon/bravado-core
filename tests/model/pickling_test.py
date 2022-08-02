@@ -38,8 +38,8 @@ def test_ensure_that_get_model_type__from_pickleable_representation_returns_the_
         else:
             return cat_type.__dict__[attr_name] == reconstructed_model_type.__dict__[attr_name]
 
-    assert [
+    assert not [
         attribute_name
         for attribute_name in iterkeys(cat_type.__dict__)
         if not is_the_same(attribute_name)
-    ] == []
+    ]

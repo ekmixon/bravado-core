@@ -208,7 +208,7 @@ def collapsed_properties(model_spec, swagger_spec):
         for item_spec in model_spec['allOf']:
             item_spec = deref(item_spec)
             more_properties = collapsed_properties(item_spec, swagger_spec)
-            properties.update(more_properties)
+            properties |= more_properties
 
     return properties
 

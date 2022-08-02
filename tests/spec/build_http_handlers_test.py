@@ -36,7 +36,7 @@ def test_yaml_http_handler_with_known_file_extension(protocol):
     handlers, response = _build_http_client(test_yaml)
 
     http_handler = handlers[protocol]
-    result = http_handler('%s://test.test/yaml/toys.yaml' % protocol)
+    result = http_handler(f'{protocol}://test.test/yaml/toys.yaml')
 
     assert result == test_dict
 
@@ -50,7 +50,7 @@ def test_yaml_http_handler_with_yaml_content_type(protocol):
     response.headers = {'content-type': 'application/yaml'}
 
     http_handler = handlers[protocol]
-    result = http_handler('%s://test.test/yaml/toys' % protocol)
+    result = http_handler(f'{protocol}://test.test/yaml/toys')
 
     assert result == test_dict
 
@@ -64,7 +64,7 @@ def test_not_yaml_content_type(protocol):
     response.headers = {'content-type': 'application/json'}
 
     http_handler = handlers[protocol]
-    result = http_handler('%s://test.test/json/test' % protocol)
+    result = http_handler(f'{protocol}://test.test/json/test')
 
     assert result == test_dict
 
@@ -78,6 +78,6 @@ def test_not_yaml_file_name(protocol):
     response.headers = {'content-type': 'text/plain'}
 
     http_handler = handlers[protocol]
-    result = http_handler('%s://test.test/json/test.json' % protocol)
+    result = http_handler(f'{protocol}://test.test/json/test.json')
 
     assert result == test_dict

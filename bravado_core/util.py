@@ -140,7 +140,7 @@ def sanitize_name(name):
         sanitized_name = regex.sub(replacement, sanitized_name)
 
     if sanitized_name == '':  # use fallback rules with more underscores
-        sanitized_name = '_' + name  # prepend _ so digits are not stripped
+        sanitized_name = f'_{name}'
         for regex, replacement in FALLBACK_SANITIZE_RULES:
             sanitized_name = regex.sub(replacement, sanitized_name)
 
@@ -236,35 +236,32 @@ def determine_object_type(object_dict, default_type_to_object=None):
     if 'in' in object_dict and 'name' in object_dict:
         # A parameter object is the only object type that could contain 'in' and 'name' at the same time
         return ObjectType.PARAMETER
+    http_operations = {'get', 'put', 'post', 'delete', 'options', 'head', 'patch'}
+    # A path item object MUST have defined at least one http operation and could optionally have 'parameter'
+    # attribute. NOTE: patterned fields (``^x-``) are acceptable in path item objects
+    object_keys = {key for key in iterkeys(object_dict) if not key.startswith('x-')}
+    if object_keys.intersection(http_operations):
+        remaining_keys = object_keys.difference(http_operations)
+        if not remaining_keys or remaining_keys == {'parameters'}:
+            return ObjectType.PATH_ITEM
     else:
-        http_operations = {'get', 'put', 'post', 'delete', 'options', 'head', 'patch'}
-        # A path item object MUST have defined at least one http operation and could optionally have 'parameter'
-        # attribute. NOTE: patterned fields (``^x-``) are acceptable in path item objects
-        object_keys = {key for key in iterkeys(object_dict) if not key.startswith('x-')}
-        if object_keys.intersection(http_operations):
-            remaining_keys = object_keys.difference(http_operations)
-            if not remaining_keys or remaining_keys == {'parameters'}:
-                return ObjectType.PATH_ITEM
-        else:
-            # A response object has:
-            #  - mandatory description field
-            #  - optional schema, headers and examples field
-            #  - no other fields are allowed
-            response_allowed_keys = {'description', 'schema', 'headers', 'examples'}
+        # A response object has:
+        #  - mandatory description field
+        #  - optional schema, headers and examples field
+        #  - no other fields are allowed
+        response_allowed_keys = {'description', 'schema', 'headers', 'examples'}
 
-            # If description field is specified and there are no other fields other the allowed response fields
-            if 'description' in object_keys and not bool(object_keys - response_allowed_keys):
-                return ObjectType.RESPONSE
-            else:
-                # A schema object has:
-                #  - no mandatory parameters
-                #  - long list of optional parameters (ie. description, type, items, properties, discriminator, etc.)
-                #  - no other fields are allowed
-                # NOTE: In case the method is mis-determining the type of a schema object, confusing it with a
-                #       response type it will be enough to add, to the object, one key that is not defined
-                #       in ``response_allowed_keys``.  (ie. ``additionalProperties: {}``, implicitly defined be specs)
-                if default_type_to_object or 'type' in object_dict:
-                    return ObjectType.SCHEMA
+        if 'description' in object_keys and not bool(object_keys - response_allowed_keys):
+            return ObjectType.RESPONSE
+        # A schema object has:
+        #  - no mandatory parameters
+        #  - long list of optional parameters (ie. description, type, items, properties, discriminator, etc.)
+        #  - no other fields are allowed
+        # NOTE: In case the method is mis-determining the type of a schema object, confusing it with a
+        #       response type it will be enough to add, to the object, one key that is not defined
+        #       in ``response_allowed_keys``.  (ie. ``additionalProperties: {}``, implicitly defined be specs)
+        if default_type_to_object or 'type' in object_dict:
+            return ObjectType.SCHEMA
     return ObjectType.UNKNOWN
 
 

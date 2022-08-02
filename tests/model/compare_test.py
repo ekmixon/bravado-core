@@ -6,7 +6,7 @@ def test_true(user):
 
 
 def test_false(user, tag_model):
-    assert not user == tag_model
+    assert user != tag_model
 
 
 def test_false_because_not_model(user):

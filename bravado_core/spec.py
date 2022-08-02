@@ -546,10 +546,7 @@ def is_yaml(url, content_type=None):
         return True
 
     _, ext = os.path.splitext(url)
-    if ext.lower() in yaml_file_extensions:
-        return True
-
-    return False
+    return ext.lower() in yaml_file_extensions
 
 
 def build_http_handlers(http_client):
@@ -645,10 +642,7 @@ def build_api_serving_url(
                 "include {1}".format(preferred_scheme, schemes),
             )
 
-        if origin.scheme in schemes:
-            return origin.scheme
-
-        return schemes[0]
+        return origin.scheme if origin.scheme in schemes else schemes[0]
 
     netloc = spec_dict.get('host', origin.netloc)
     base_path = '/'

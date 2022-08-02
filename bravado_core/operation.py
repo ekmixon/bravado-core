@@ -29,7 +29,7 @@ def _sanitize_operation_id(operation_id, http_method, path_name):
     # id a value that gets sanitized down to an empty string or an underscore
     if sanitized_operation_id in {'', '_'}:
         # build based on the http method and request path
-        sanitized_operation_id = sanitize_name(http_method + '_' + path_name)
+        sanitized_operation_id = sanitize_name(f'{http_method}_{path_name}')
 
     # Handle super crazy corner case where even ``http_method + '_' + path_name``
     # gets sanitized down to just an underscore (the empty string is just there for good measure)
@@ -85,14 +85,18 @@ class Operation(object):
         if id(self) == id(other):
             return True
 
-        if not isinstance(other, self.__class__):
-            return False
-
         return (
-            self.path_name == other.path_name and
-            self.http_method == other.http_method and
-            self.op_spec == other.op_spec and
-            (ignore_swagger_spec or self.swagger_spec.is_equal(other.swagger_spec))
+            (
+                self.path_name == other.path_name
+                and self.http_method == other.http_method
+                and self.op_spec == other.op_spec
+                and (
+                    ignore_swagger_spec
+                    or self.swagger_spec.is_equal(other.swagger_spec)
+                )
+            )
+            if isinstance(other, self.__class__)
+            else False
         )
 
     @cached_property
@@ -194,10 +198,7 @@ class Operation(object):
     def __repr__(self):
         # type: () -> str
         repr = u"{self.__class__.__name__}({self.operation_id})".format(self=self)
-        if PY2:
-            return repr.encode('ascii', 'backslashreplace')
-        else:
-            return repr
+        return repr.encode('ascii', 'backslashreplace') if PY2 else repr
 
 
 def build_params(op):
@@ -241,10 +242,9 @@ def build_params(op):
                     parameter.name,
                 ),
             )
-        else:
-            # not directly in params because different security requirements could share parameters
-            new_params[param_name] = parameter
-            new_param_aliases[parameter.name] = param_name
+        # not directly in params because different security requirements could share parameters
+        new_params[param_name] = parameter
+        new_param_aliases[parameter.name] = param_name
 
     params.update(new_params)
     for alias, name in iteritems(new_param_aliases):

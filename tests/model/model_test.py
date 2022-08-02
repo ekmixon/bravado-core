@@ -235,8 +235,8 @@ def test_model_isinstance(polymorphic_spec, instance_dict, object_type, possible
         model_spec=polymorphic_spec.spec_dict['definitions'][object_type],
         model_value=instance_dict,
     )
-    assert not any(
-        not isinstance(model, polymorphic_spec.definitions[possible_object_type])
+    assert all(
+        isinstance(model, polymorphic_spec.definitions[possible_object_type])
         for possible_object_type in possible_object_types
     )
 
@@ -315,22 +315,22 @@ def test_ensure_model_spec_does_not_contain_references_if_fully_dereference_is_e
 
 
 def test_isinstance_wrong_model_class_is_not_confused_with_model():
-    assert isinstance(ModelFromWrongModelClass(), Model) is False
-    assert isinstance(ModelFromWrongModelClass(), WrongModelClass) is True
+    assert not isinstance(ModelFromWrongModelClass(), Model)
+    assert isinstance(ModelFromWrongModelClass(), WrongModelClass)
 
 
 def test_isinstance_model_instance_is_recognized_properly(user_type, user_kwargs, cat_type):
-    assert isinstance(user_type(**user_kwargs), WrongModelClass) is False
-    assert isinstance(user_type(**user_kwargs), Model) is True
-    assert isinstance(user_type(**user_kwargs), user_type) is True
-    assert isinstance(user_type(**user_kwargs), cat_type) is False
+    assert not isinstance(user_type(**user_kwargs), WrongModelClass)
+    assert isinstance(user_type(**user_kwargs), Model)
+    assert isinstance(user_type(**user_kwargs), user_type)
+    assert not isinstance(user_type(**user_kwargs), cat_type)
 
 
 def test_isinstance_works_in_case_of_inheritance(polymorphic_spec):
     dog = polymorphic_spec.definitions['Dog']._unmarshal({'name': 'name', 'type': 'Dog', 'birth_date': '2017-11-02'})
-    assert isinstance(dog, polymorphic_spec.definitions['Dog']) is True
-    assert isinstance(dog, polymorphic_spec.definitions['Cat']) is False
-    assert isinstance(dog, polymorphic_spec.definitions['GenericPet']) is True
+    assert isinstance(dog, polymorphic_spec.definitions['Dog'])
+    assert not isinstance(dog, polymorphic_spec.definitions['Cat'])
+    assert isinstance(dog, polymorphic_spec.definitions['GenericPet'])
 
 
 def test_ensure_that_tricking_abc_attributes_do_not_alter_results(polymorphic_spec):
@@ -339,5 +339,5 @@ def test_ensure_that_tricking_abc_attributes_do_not_alter_results(polymorphic_sp
     dog = Dog._unmarshal({'name': 'name', 'type': 'Dog', 'birth_date': '2017-11-02'})
     assert isinstance(dog, Dog)
     assert isinstance(dog, Dog)
-    assert isinstance(dog, Cat) is False
-    assert isinstance(dog, Cat) is False
+    assert not isinstance(dog, Cat)
+    assert not isinstance(dog, Cat)

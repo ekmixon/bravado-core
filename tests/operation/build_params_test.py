@@ -221,6 +221,6 @@ def test_sanitized_param(minimal_swagger_dict):
     op = Operation(swagger_spec, '/pets', 'get', op_spec)
     params = build_params(op)
     assert len(params) == 1
-    assert [p for p in params] == ['pet_id']
+    assert list(params) == ['pet_id']
     assert 'pet-id' in params
     assert params['pet_id'] is params['pet-id']

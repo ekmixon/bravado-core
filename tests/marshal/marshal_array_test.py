@@ -173,7 +173,7 @@ def test_array_of_models(petstore_dict):
 
 
 def test_non_list_like_type_throws_error(empty_swagger_spec, int_array_spec):
-    i_am_not_a_list = dict()
+    i_am_not_a_list = {}
     with pytest.raises(SwaggerMappingError) as excinfo:
         marshal_array(empty_swagger_spec, int_array_spec, i_am_not_a_list)
     assert 'Expected list like type' in str(excinfo.value)

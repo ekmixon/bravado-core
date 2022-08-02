@@ -87,9 +87,10 @@ def test_value_is_not_dict_like_raises_error(petstore_dict):
     value = 'i am not a dict'
     with pytest.raises(SwaggerMappingError) as excinfo:
         marshal_model(petstore_spec, pet_spec, value)
-    assert "Expected type to be dict or Model to marshal value '{}' to a dict. Was {} instead.".format(
-        value, type(value),
-    ) in str(excinfo.value)
+    assert (
+        f"Expected type to be dict or Model to marshal value '{value}' to a dict. Was {type(value)} instead."
+        in str(excinfo.value)
+    )
 
 
 def test_marshal_model_with_none_model_type(petstore_spec):

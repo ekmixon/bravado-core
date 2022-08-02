@@ -155,16 +155,15 @@ class _SpecFlattener(object):
                 known_mapping_key = object_type.get_root_holder()
                 if known_mapping_key is None:
                     return self.descend(value=deref_value)
-                else:
-                    uri = urlparse(uri)
-                    if uri not in self.known_mappings.get(known_mapping_key, {}):
-                        # The placeholder is present to interrupt the recursion
-                        # during the recursive traverse of the data model (``descend``)
-                        self.known_mappings[known_mapping_key][uri] = None
+                uri = urlparse(uri)
+                if uri not in self.known_mappings.get(known_mapping_key, {}):
+                    # The placeholder is present to interrupt the recursion
+                    # during the recursive traverse of the data model (``descend``)
+                    self.known_mappings[known_mapping_key][uri] = None
 
-                        self.known_mappings[known_mapping_key][uri] = self.descend(value=deref_value)
+                    self.known_mappings[known_mapping_key][uri] = self.descend(value=deref_value)
 
-                    return {'$ref': '#/{}/{}'.format(known_mapping_key, self.marshal_uri(uri))}
+                return {'$ref': f'#/{known_mapping_key}/{self.marshal_uri(uri)}'}
 
         elif is_dict_like(value):
             return {
@@ -173,10 +172,7 @@ class _SpecFlattener(object):
             }
 
         elif is_list_like(value):
-            return [
-                self.descend(value=subval)
-                for index, subval in enumerate(value)
-            ]
+            return [self.descend(value=subval) for subval in value]
 
         else:
             return value

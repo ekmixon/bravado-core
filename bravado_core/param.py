@@ -217,8 +217,7 @@ def unmarshal_param(param, request):
     if swagger_spec.config['validate_requests']:
         validate_schema_object(swagger_spec, param_spec, raw_value)
 
-    value = unmarshal_schema_object(swagger_spec, param_spec, raw_value)
-    return value
+    return unmarshal_schema_object(swagger_spec, param_spec, raw_value)
 
 
 def string_to_boolean(value):
@@ -344,11 +343,7 @@ def add_file(param, value, request):
                 ),
             )
 
-    if isinstance(value, tuple):
-        filename, val = value
-    else:
-        filename, val = param.name, value
-
+    filename, val = value if isinstance(value, tuple) else (param.name, value)
     file_tuple = (param.name, (filename, val))
     request['files'].append(file_tuple)
 
@@ -404,10 +399,11 @@ def unmarshal_collection_format(swagger_spec, param_spec, value):
     collection_format = param_spec.get('collectionFormat', 'csv')
 
     if value is None:
-        if not schema.is_required(swagger_spec, param_spec):
-            # Just pass through an optional array that has no value
-            return None
-        return schema.handle_null_value(swagger_spec, param_spec)
+        return (
+            schema.handle_null_value(swagger_spec, param_spec)
+            if schema.is_required(swagger_spec, param_spec)
+            else None
+        )
 
     if schema.is_list_like(value):
         value_array = value
@@ -416,11 +412,7 @@ def unmarshal_collection_format(swagger_spec, param_spec, value):
         value_array = [value]
     else:
         sep = COLLECTION_FORMATS[collection_format]
-        if value == '':
-            value_array = []
-        else:
-            value_array = value.split(sep)
-
+        value_array = [] if value == '' else value.split(sep)
     items_spec = param_spec['items']
     items_type = deref(items_spec).get('type')
     param_name = param_spec['name']

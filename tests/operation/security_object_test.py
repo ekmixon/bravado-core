@@ -183,4 +183,4 @@ def test_only_one_security_definition_in_use_at_time(
     except SwaggerSecurityValidationError as e:
         raised_exception = e
 
-    assert bool(raised_exception is not None) is expect_to_raise
+    assert (raised_exception is not None) is expect_to_raise

@@ -28,9 +28,10 @@ def test_operation_id_raises_when_missing_operation_id_and_possible_sanitization
     operation = Operation(spec, '/', http_method, operation_spec)
     with pytest.raises(ValueError) as excinfo:
         operation.operation_id
-    assert 'empty operation id starting from operation_id=None, http_method={} and path_name=/'.format(
-        http_method,
-    ) in str(excinfo.value)
+    assert (
+        f'empty operation id starting from operation_id=None, http_method={http_method} and path_name=/'
+        in str(excinfo.value)
+    )
 
 
 def test_returns_generated_operation_id_with_path_parameters():

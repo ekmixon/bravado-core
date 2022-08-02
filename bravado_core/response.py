@@ -205,19 +205,17 @@ def validate_response_body(op, response_spec, response):
             ),
         )
 
-    if response.content_type == APP_JSON or response.content_type == APP_MSGPACK:
-        if response.content_type == APP_JSON:
-            response_value = response.json()
-        else:
-            response_value = msgpack.loads(response.raw_bytes, raw=False)
+    if response.content_type == APP_JSON:
+        response_value = response.json()
         validate_schema_object(
             op.swagger_spec, response_body_spec, response_value,
         )
-    elif response.content_type.startswith("text/"):
-        # TODO: support some kind of validation for text/* responses
-        # TODO: but in the meantime don't raise errors for them
-        pass
-    else:
+    elif response.content_type == APP_MSGPACK:
+        response_value = msgpack.loads(response.raw_bytes, raw=False)
+        validate_schema_object(
+            op.swagger_spec, response_body_spec, response_value,
+        )
+    elif not response.content_type.startswith("text/"):
         # TODO: Expand content-type support for non-json types
         raise SwaggerMappingError(
             "Unsupported content-type in response: {0}".format(response.content_type),

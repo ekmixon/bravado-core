@@ -46,7 +46,7 @@ def test_pass_if_not_required_parameter_and_not_present(
             schema=param_spec,
         ),
     )
-    assert len(errors) == 0
+    assert not errors
 
 
 @patch('bravado_core.swagger20_validator._DRAFT4_REQUIRED_VALIDATOR')

@@ -77,12 +77,10 @@ def create_operation_docstring(op):
     if is_deprecated:
         s += '** DEPRECATED **\n'
 
-    summary = op_spec.get('summary')
-    if summary:
+    if summary := op_spec.get('summary'):
         s += u'[{0}] {1}\n\n'.format(op.http_method.upper(), summary)
 
-    desc = op_spec.get('description')
-    if desc:
+    if desc := op_spec.get('description'):
         s += u'{0}\n\n'.format(desc)
 
     # TODO: add shared parameters
@@ -95,8 +93,7 @@ def create_operation_docstring(op):
     for http_status_code, response_spec in iter(sorted(iteritems(responses))):
         response_desc = response_spec.get('description')
         s += u':returns: {0}: {1}\n'.format(http_status_code, response_desc)
-        schema_spec = response_spec.get('schema')
-        if schema_spec:
+        if schema_spec := response_spec.get('schema'):
             s += u':rtype: {0}\n'.format(formatted_type(schema_spec))
     return s
 
@@ -113,7 +110,7 @@ def create_param_docstring(param_spec):
     """
     name = param_spec.get('name')
     desc = param_spec.get('description', 'Document your spec, yo!')
-    desc = desc if desc else 'Document your spec, yo!'
+    desc = desc or 'Document your spec, yo!'
     default_value = param_spec.get('default')
     location = param_spec.get('in')
     required = param_spec.get('required', False)

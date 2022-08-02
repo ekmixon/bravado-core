@@ -75,14 +75,14 @@ def test_int32_int(minimal_swagger_spec):
 
 def test_float(minimal_swagger_spec):
     float_spec = {'type': 'number', 'format': 'float'}
-    result = to_python(minimal_swagger_spec, float_spec, float(3.14))
+    result = to_python(minimal_swagger_spec, float_spec, 3.14)
     assert 3.14 == result
     assert isinstance(result, float)
 
 
 def test_double(minimal_swagger_spec):
     double_spec = {'type': 'number', 'format': 'double'}
-    result = to_python(minimal_swagger_spec, double_spec, float(3.14))
+    result = to_python(minimal_swagger_spec, double_spec, 3.14)
     assert 3.14 == result
     assert isinstance(result, float)
 

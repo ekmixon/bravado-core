@@ -35,10 +35,15 @@ def _equivalent(spec, obj1, obj2):
         if len(obj1) != len(obj2):
             return False
 
-        for key in range(len(obj1)):
-            if not _equivalent(spec, spec._force_deref(obj1[key]), spec._force_deref(obj2[key])):
-                return False
-        return True
+        return all(
+            _equivalent(
+                spec,
+                spec._force_deref(obj1[key]),
+                spec._force_deref(obj2[key]),
+            )
+            for key in range(len(obj1))
+        )
+
     else:
         return obj1 == obj2
 

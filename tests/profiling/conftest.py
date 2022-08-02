@@ -15,20 +15,19 @@ def number_of_objects(request):
 
 @pytest.fixture
 def small_pets(number_of_objects):
-    pets = []
-    for i in range(number_of_objects):
-        pets.append({
+    return [
+        {
             'name': str(uuid.uuid4()),
             'photoUrls': [str(uuid.uuid4())],
-        })
-    return pets
+        }
+        for _ in range(number_of_objects)
+    ]
 
 
 @pytest.fixture
 def large_pets(number_of_objects):
-    pets = []
-    for i in range(number_of_objects):
-        pets.append({
+    return [
+        {
             'id': i + 1,
             'name': str(uuid.uuid4()),
             'status': 'available',
@@ -47,8 +46,9 @@ def large_pets(number_of_objects):
                     'name': 'brown',
                 },
             ],
-        })
-    return pets
+        }
+        for i in range(number_of_objects)
+    ]
 
 
 @pytest.fixture(

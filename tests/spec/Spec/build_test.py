@@ -94,10 +94,10 @@ def test_build_using_spec_url_for_base_path(petstore_abspath, petstore_dict, use
 
     base_url = 'http://' + petstore_dict['host']
     if not use_spec_url_for_base_path:
-        assert spec.api_url == base_url + '/'
+        assert spec.api_url == f'{base_url}/'
     else:
         petstore_path = get_url_path(origin_url)
-        assert spec.api_url == '{}/{}'.format(base_url, pathname2url(petstore_path).lstrip('/'))
+        assert spec.api_url == f"{base_url}/{pathname2url(petstore_path).lstrip('/')}"
 
 
 def test_not_object_x_models_are_not_generating_models(minimal_swagger_dict):

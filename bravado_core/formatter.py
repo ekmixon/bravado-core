@@ -60,10 +60,7 @@ def to_wire(
         return formatter.to_wire(value) if formatter else value
     except Exception as e:
         raise SwaggerMappingError(
-            'Error while marshalling value={} to type={}{}.'.format(
-                value, primitive_spec['type'],
-                '/{}'.format(primitive_spec['format']) if 'format' in primitive_spec else '',
-            ),
+            f"""Error while marshalling value={value} to type={primitive_spec['type']}{f"/{primitive_spec['format']}" if 'format' in primitive_spec else ''}.""",
             e,
         )
 
@@ -140,12 +137,14 @@ def return_true_wrapper(validate_func):
 
 BASE64_BYTE_FORMAT = SwaggerFormat(
     format='byte',
-    # Note: In Python 3, this requires a bytes-like object as input
-    to_wire=lambda b: six.ensure_str(base64.b64encode(b), encoding=str('ascii')),
-    to_python=lambda s: base64.b64decode(six.ensure_binary(s, encoding=str('ascii'))),
-    validate=NO_OP,  # jsonschema validates string
+    to_wire=lambda b: six.ensure_str(base64.b64encode(b), encoding='ascii'),
+    to_python=lambda s: base64.b64decode(
+        six.ensure_binary(s, encoding='ascii')
+    ),
+    validate=NO_OP,
     description='Converts [wire]string:byte <=> python bytes',
 )
+
 
 DEFAULT_FORMATS = {
     'byte': SwaggerFormat(

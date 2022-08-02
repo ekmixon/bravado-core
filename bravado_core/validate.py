@@ -38,7 +38,7 @@ def scrub_sensitive_value(func):
                 isinstance(e.schema, dict) and
                 e.schema.get('x-sensitive', False)
             ):
-                e.message = '*** ' + e.message[len(str(e.instance)):]
+                e.message = f'*** {e.message[len(str(e.instance)):]}'
                 e.instance = '***'
             reraise(*sys.exc_info())
 
@@ -73,10 +73,7 @@ def validate_schema_object(
     elif is_object(swagger_spec, schema_object_spec):
         validate_object(swagger_spec, schema_object_spec, value)
 
-    elif obj_type == 'file':
-        pass
-
-    else:
+    elif obj_type != 'file':
         raise SwaggerMappingError(
             'Unknown type {0} for value {1}'.format(obj_type, value),
         )
@@ -154,20 +151,27 @@ def validate_security_object(
     :raise: SwaggerSecurityValidationError
     """
 
-    security_types = set(
+    security_types = {
         definition.type
         for security_requirement in op.security_requirements
         for definition in itervalues(security_requirement.security_definitions)
-    )
+    }
+
 
     # At the moment we are handling only apiKey securities
     if 'apiKey' in security_types:
-        matched_security_indexes = []
-        for security_index, security_params_list in enumerate(op.security_requirements):
-            if all([request_data.get(security_param.name) is not None for security_param in security_params_list]):
-                matched_security_indexes.append(security_index)
+        matched_security_indexes = [
+            security_index
+            for security_index, security_params_list in enumerate(
+                op.security_requirements
+            )
+            if all(
+                request_data.get(security_param.name) is not None
+                for security_param in security_params_list
+            )
+        ]
 
-        if len(matched_security_indexes) == 0:
+        if not matched_security_indexes:
             raise SwaggerSecurityValidationError('No security definition used.')
 
         if len(matched_security_indexes) > 1:

@@ -290,7 +290,7 @@ def _marshal_object(
             marshaling_function = _get_marshaling_method(swagger_spec=swagger_spec, object_schema=discriminated_model._model_spec)
             return marshaling_function(model_value)
 
-    marshaled_value = dict()
+    marshaled_value = {}
     for property_name in model_value:
         property_value = model_value[property_name]
         property_marshaling_function = properties_to_marshaling_function.get(
@@ -358,11 +358,12 @@ def _marshaling_method_object(swagger_spec, object_schema):
     discriminator_property = object_schema.get('discriminator')
     possible_discriminated_type_name_to_model = {}
     if model_type and object_schema.get('discriminator'):
-        possible_discriminated_type_name_to_model.update({
+        possible_discriminated_type_name_to_model |= {
             k: v
             for k, v in iteritems(swagger_spec.definitions)
             if model_type and model_type.__name__ in v._inherits_from
-        })
+        }
+
 
     nullable_properties = {
         prop_name
@@ -395,9 +396,7 @@ def _marshal_primitive_type(primitive_type, swagger_format, value):
         return swagger_format.to_wire(value)
     except Exception as e:
         raise SwaggerMappingError(
-            'Error while marshalling value={} to type={}/{}.'.format(
-                value, primitive_type, swagger_format.format,
-            ),
+            f'Error while marshalling value={value} to type={primitive_type}/{swagger_format.format}.',
             e,
         )
 

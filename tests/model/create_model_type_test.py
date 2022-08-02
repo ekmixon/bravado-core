@@ -8,7 +8,7 @@ from bravado_core.schema import is_ref
 
 def test_pet_model(empty_swagger_spec, pet_spec):
     Pet = create_model_type(empty_swagger_spec, 'Pet', pet_spec)
-    expected = set(['id', 'category', 'name', 'photoUrls', 'tags'])
+    expected = {'id', 'category', 'name', 'photoUrls', 'tags'}
     pet = Pet(id=1, name='Darwin')
     assert set(dir(pet)) == expected
     assert pet == Pet(id=1, name='Darwin')

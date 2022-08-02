@@ -51,7 +51,7 @@ def test_warning_for_clashed_uris(mock_warnings, spec_flattener):
     )
 
     mock_warnings.warn.assert_called_once_with(
-        message='{} clashed to {}'.format(', '.join(sorted(clashing_uris)), marshaled_uri),
+        message=f"{', '.join(sorted(clashing_uris))} clashed to {marshaled_uri}",
         category=Warning,
     )
 
@@ -347,7 +347,10 @@ def test_include_root_definition(minimal_swagger_dict, minimal_swagger_abspath):
 
     spec_flattener.include_root_definition()
 
-    fragment_uri = '{}#/definitions/not_used_model'.format(get_url(minimal_swagger_abspath))
+    fragment_uri = (
+        f'{get_url(minimal_swagger_abspath)}#/definitions/not_used_model'
+    )
+
     assert spec_flattener.known_mappings['definitions'] == {
         urlparse(fragment_uri): minimal_swagger_dict['definitions']['not_used_model'],
     }
@@ -376,14 +379,17 @@ def test_include_discriminated_models(minimal_swagger_dict, minimal_swagger_absp
     }
     spec_flattener = _spec_flattener(Spec.from_dict(minimal_swagger_dict, origin_url=get_url(minimal_swagger_abspath)))
 
-    base_fragment_uri = '{}#/definitions/base'.format(get_url(minimal_swagger_abspath))
+    base_fragment_uri = f'{get_url(minimal_swagger_abspath)}#/definitions/base'
     spec_flattener.known_mappings['definitions'] = {
         urlparse(base_fragment_uri): minimal_swagger_dict['definitions']['base'],
     }
 
     spec_flattener.include_discriminated_models()
 
-    not_used_extend_base_fragment_uri = '{}#/definitions/not_used_extend_base'.format(get_url(minimal_swagger_abspath))
+    not_used_extend_base_fragment_uri = (
+        f'{get_url(minimal_swagger_abspath)}#/definitions/not_used_extend_base'
+    )
+
 
     assert spec_flattener.known_mappings['definitions'] == {
         urlparse(base_fragment_uri): minimal_swagger_dict['definitions']['base'],

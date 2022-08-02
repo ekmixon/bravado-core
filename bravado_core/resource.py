@@ -39,9 +39,9 @@ def convert_path_to_resource(path_name):
         should be associated with.
     """
     tokens = path_name.lstrip('/').split('/')
-    err_msg = "Could not extract resource name from path {0}"
     resource_name = tokens[0]
     if not resource_name:
+        err_msg = "Could not extract resource name from path {0}"
         raise SwaggerMappingError(err_msg.format(path_name))
     return resource_name
 
@@ -130,10 +130,7 @@ class Resource(object):
     def __repr__(self):
         # type: () -> str
         repr = u"{self.__class__.__name__}({self.name})".format(self=self)
-        if PY2:
-            return repr.encode('ascii', 'backslashreplace')
-        else:
-            return repr
+        return repr.encode('ascii', 'backslashreplace') if PY2 else repr
 
     def __getattr__(self, item):
         # type: (typing.Text) -> Operation
@@ -141,10 +138,10 @@ class Resource(object):
         :param item: name of the operation to return
         :rtype: :class:`bravado_core.operation.Operation`
         """
-        op = self.operations.get(item)
-        if not op:
+        if op := self.operations.get(item):
+            return op
+        else:
             raise AttributeError(u"Resource '{0}' has no operation '{1}'".format(self.name, item))
-        return op
 
     def __dir__(self):
         # type: () -> typing.Iterable[typing.Text]

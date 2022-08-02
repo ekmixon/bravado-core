@@ -302,12 +302,10 @@ def check_object_deepcopy(obj):
         )
         if id(getattr(obj, attr_name, None)) == id(getattr(obj_copy, attr_name, None))
     }
-    assert not any(
-        # If `attr_name: attr_value` is in attributes_with_same_id then attr_value id did not change
-        # after deepcopy. As immutable types do not create new instances for deepcopy we need to ensure
-        # that all the occurrences of "same-id" are related to immutable types.
-        not isinstance(attr_value, (type(None), str, tuple))
+    assert all(
+        isinstance(attr_value, (type(None), str, tuple))
         for attr_name, attr_value in iteritems(attributes_with_same_id)
     )
+
 
     return obj_copy

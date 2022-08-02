@@ -36,10 +36,7 @@ MODEL_MARKER = 'x-model'
 
 def _get_model_name(model_dict):
     """Determine model name from model dictionary representation and Swagger Path"""
-    model_name = model_dict.get(MODEL_MARKER)
-    if not model_name:
-        model_name = model_dict.get('title')
-    return model_name
+    return model_dict.get(MODEL_MARKER) or model_dict.get('title')
 
 
 def _raise_or_warn_duplicated_model(swagger_spec, message):
@@ -166,18 +163,17 @@ def _bless_models(container, json_reference, visited_models, swagger_spec):
     ):
         return
 
-    model_name = _get_model_name(model_spec)
-    if not model_name:
+    if model_name := _get_model_name(model_spec):
+        _register_visited_model(
+            json_reference=json_reference,
+            model_spec=model_spec,
+            model_name=model_name,
+            visited_models=visited_models,
+            is_blessed=True,
+            swagger_spec=swagger_spec,
+        )
+    else:
         return
-
-    _register_visited_model(
-        json_reference=json_reference,
-        model_spec=model_spec,
-        model_name=model_name,
-        visited_models=visited_models,
-        is_blessed=True,
-        swagger_spec=swagger_spec,
-    )
 
 
 def _collect_models(container, json_reference, models, swagger_spec):
@@ -232,8 +228,8 @@ def _collect_models(container, json_reference, models, swagger_spec):
 
 
 class ModelMeta(abc.ABCMeta):
-    def __instancecheck__(cls, instance):
-        return cls.__subclasscheck__(instance.__class__)
+    def __instancecheck__(self, instance):
+        return self.__subclasscheck__(instance.__class__)
 
     def __subclasscheck__(cls, subclass):
         def _is_same_model(m1, m2):
@@ -362,7 +358,7 @@ class Model(object):
         # Create the attribute value dictionary
         # We need bypass the overloaded __setattr__ method
         # Note the name mangling!
-        object.__setattr__(self, '_Model__dict', dict())
+        object.__setattr__(self, '_Model__dict', {})
 
         # Additional property names in dct
         additional = set(dct).difference(self._properties)
@@ -477,7 +473,7 @@ class Model(object):
 
         # Ignore any '_raw' keys
         def norm_dict(d):
-            return dict((k, d[k]) for k in d if k != '_raw')
+            return {k: d[k] for k in d if k != '_raw'}
 
         return norm_dict(self.__dict) == norm_dict(other.__dict)
 
@@ -516,7 +512,7 @@ class Model(object):
         :rtype: dict
         """
 
-        dct = dict()
+        dct = {}
         for attr_name, attr_val in iteritems(self.__dict):
             if attr_name not in self._properties and not additional_properties:
                 continue

@@ -70,8 +70,7 @@ def format_validator(
     ):
         return
 
-    for error in _DRAFT4_FORMAT_VALIDATOR(validator, format, instance, schema):
-        yield error
+    yield from _DRAFT4_FORMAT_VALIDATOR(validator, format, instance, schema)
 
 
 def type_validator(
@@ -106,8 +105,7 @@ def type_validator(
     ):
         return
 
-    for error in _DRAFT4_TYPE_VALIDATOR(validator, types, instance, schema):
-        yield error
+    yield from _DRAFT4_TYPE_VALIDATOR(validator, types, instance, schema)
 
 
 def required_validator(
@@ -136,8 +134,7 @@ def required_validator(
         if required and instance is None:
             yield ValidationError('{0} is a required parameter.'.format(schema['name']))
     else:
-        for error in _DRAFT4_REQUIRED_VALIDATOR(validator, required, instance, schema):
-            yield error
+        yield from _DRAFT4_REQUIRED_VALIDATOR(validator, required, instance, schema)
 
 
 def enum_validator(
@@ -168,17 +165,18 @@ def enum_validator(
 
     if schema.get('type') == 'array':
         for element in instance:
-            for error in _DRAFT4_ENUM_VALIDATOR(validator, enums, element, schema):
-                yield error
+            yield from _DRAFT4_ENUM_VALIDATOR(validator, enums, element, schema)
         return
 
     # Handle optional enum params with no value
-    if is_param_spec(swagger_spec, schema):
-        if instance is None and not is_required(swagger_spec, schema):
-            return
+    if (
+        is_param_spec(swagger_spec, schema)
+        and instance is None
+        and not is_required(swagger_spec, schema)
+    ):
+        return
 
-    for error in _DRAFT4_ENUM_VALIDATOR(validator, enums, instance, schema):
-        yield error
+    yield from _DRAFT4_ENUM_VALIDATOR(validator, enums, instance, schema)
 
 
 def discriminator_validator(
@@ -216,12 +214,13 @@ def discriminator_validator(
     try:
         discriminator_value = instance[discriminator_attribute]
     except KeyError:
-        raise ValidationError("'{}' is a required property".format(discriminator_attribute))
+        raise ValidationError(f"'{discriminator_attribute}' is a required property")
 
     if discriminator_value not in swagger_spec.definitions:
         raise ValidationError(
-            message='\'{}\' is not a recognized schema'.format(discriminator_value),
+            message=f"\'{discriminator_value}\' is not a recognized schema"
         )
+
 
     if discriminator_value == schema[MODEL_MARKER]:
         return
@@ -229,19 +228,17 @@ def discriminator_validator(
     discriminated_schema = swagger_spec.definitions[discriminator_value]._model_spec
     if 'allOf' not in discriminated_schema:
         raise ValidationError(
-            message='discriminated schema \'{}\' must inherit from \'{}\''.format(
-                discriminator_value, schema[MODEL_MARKER],
-            ),
+            message=f"discriminated schema \'{discriminator_value}\' must inherit from \'{schema[MODEL_MARKER]}\'"
         )
+
 
     schemas_to_remove = [s for s in discriminated_schema['allOf'] if swagger_spec.deref(s) == schema]
     if not schemas_to_remove:
         # Not checking against len(schemas_to_remove) > 1 because it should be prevented by swagger spec validation
         raise ValidationError(
-            message='discriminated schema \'{}\' must inherit from \'{}\''.format(
-                discriminator_value, schema[MODEL_MARKER],
-            ),
+            message=f"discriminated schema \'{discriminator_value}\' must inherit from \'{schema[MODEL_MARKER]}\'"
         )
+
 
     # Remove the current schema from the allOf list in order to avoid unbounded recursion
     # (the current object is already validated against schema)
@@ -289,16 +286,14 @@ def ref_validator(
     if resolve is None:
         with in_scope(validator.resolver, schema):
             with validator.resolver.resolving(ref) as resolved:
-                for error in validator.descend(instance, resolved):
-                    yield error
+                yield from validator.descend(instance, resolved)
     else:
         with in_scope(validator.resolver, schema):
             scope, resolved = validator.resolver.resolve(ref)
         validator.resolver.push_scope(scope)
 
         try:
-            for error in validator.descend(instance, resolved):
-                yield error
+            yield from validator.descend(instance, resolved)
         finally:
             validator.resolver.pop_scope()
 

@@ -371,11 +371,12 @@ def _unmarshaling_method_object(swagger_spec, object_schema, use_models=True):
     discriminator_property = object_schema.get('discriminator')
     possible_discriminated_type_name_to_model = {}
     if model_type and object_schema.get('discriminator'):
-        possible_discriminated_type_name_to_model.update({
+        possible_discriminated_type_name_to_model |= {
             k: v
             for k, v in iteritems(swagger_spec.definitions)
             if model_type and model_type.__name__ in v._inherits_from
-        })
+        }
+
 
     return partial(
         _unmarshal_object,

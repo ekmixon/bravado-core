@@ -44,13 +44,17 @@ def test_cached_property():
 
 
 def test_class_cached_property():
+
+
+
     class Class(object):
         calls = 0
 
         @lazy_class_attribute
-        def prop(cls):
-            cls.calls += 1
-            return cls.calls
+        def prop(self):
+            self.calls += 1
+            return self.calls
+
 
     class_instance_1 = Class()
     assert class_instance_1.calls == 0
@@ -158,7 +162,7 @@ def test_AliasKeyDict():
     alias_dict = AliasKeyDict({'a': 'b', 'c': 'd'})
     alias_dict.add_alias('alias_a', 'a')
     assert len(alias_dict) == 2
-    assert set(alias_dict.items()) == set([('a', 'b'), ('c', 'd')])
+    assert set(alias_dict.items()) == {('a', 'b'), ('c', 'd')}
     assert 'alias_a' in alias_dict
     assert alias_dict['alias_a'] is alias_dict['a']
     assert alias_dict.get('alias_a') is alias_dict.get('a')

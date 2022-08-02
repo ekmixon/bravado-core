@@ -463,10 +463,13 @@ def test_validate_object_with_recursive_definition(
     # to force bravado-core to recognize models that are defined on #/definitions of
     # referenced files or defined on un-referenced files
     polymorphic_dict['definitions']['GenericPet']['x-referred-schema'] = [
-        {'$ref': '#/definitions/{}'.format(definition_key)}
-        for definition_key, definition in iteritems(polymorphic_dict['definitions'])
+        {'$ref': f'#/definitions/{definition_key}'}
+        for definition_key, definition in iteritems(
+            polymorphic_dict['definitions']
+        )
         if {'$ref': '#/definitions/GenericPet'} in definition.get('allOf', [])
     ]
+
 
     polymorphic_spec = Spec.from_dict(
         spec_dict=polymorphic_dict,

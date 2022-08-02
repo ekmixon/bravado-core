@@ -93,7 +93,11 @@ def test_marshal_raises_SwaggerMappingError_if_SwaggerFormat_fails_during_to_wir
             value={'date': date_str},
         )
     message, wrapped_exception = excinfo.value.args
-    assert message == 'Error while marshalling value={} to type=string/date.'.format(date_str)
+    assert (
+        message
+        == f'Error while marshalling value={date_str} to type=string/date.'
+    )
+
     assert type(wrapped_exception) is AttributeError
     assert wrapped_exception.args == ('\'str\' object has no attribute \'isoformat\'', )
 
