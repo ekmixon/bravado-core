@@ -6,3 +6,4 @@ pre-commit
 pytest-benchmark[histogram]
 pytest-cov
 pytest<4.7  # need support for Python 2.7, see https://docs.pytest.org/en/latest/py27-py34-deprecation.html
+setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
